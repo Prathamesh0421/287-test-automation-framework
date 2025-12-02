@@ -1,0 +1,51 @@
+.config-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 30px;
+  border-radius: 15px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+}
+
+.config-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.config-icon {
+  color: var(--primary);
+}
+
+.config-label {
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.config-value {
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.config-divider {
+  width: 2px;
+  height: 30px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  border-radius: 2px;
+}
+
+@media (max-width: 768px) {
+  .config-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .config-divider {
+    display: none;
+  }
+}

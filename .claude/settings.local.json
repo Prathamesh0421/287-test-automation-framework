@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod:*)",
+      "Bash(source venv/bin/activate)",
+      "Bash(python diagnose.py:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

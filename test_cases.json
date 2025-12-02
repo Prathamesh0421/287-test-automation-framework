@@ -1,0 +1,54 @@
+{
+  "test_cases": [
+    {
+      "id": 1,
+      "image_path": "test_images/dog_park.jpg",
+      "expected_description": "A golden retriever playing in a park"
+    },
+    {
+      "id": 2,
+      "image_path": "test_images/city_skyline.jpg",
+      "expected_description": "A city skyline at sunset with tall buildings"
+    },
+    {
+      "id": 3,
+      "image_path": "test_images/coffee_cup.jpg",
+      "expected_description": "A cup of coffee on a wooden table"
+    },
+    {
+      "id": 4,
+      "image_path": "test_images/beach_sunset.jpg",
+      "expected_description": "A beach scene during sunset with waves"
+    },
+    {
+      "id": 5,
+      "image_path": "test_images/mountain_landscape.jpg",
+      "expected_description": "Snow-capped mountains with pine trees"
+    },
+    {
+      "id": 6,
+      "image_path": "test_images/food_plate.jpg",
+      "expected_description": "A plate of pasta with tomato sauce"
+    },
+    {
+      "id": 7,
+      "image_path": "test_images/car_street.jpg",
+      "expected_description": "A red sports car parked on a street"
+    },
+    {
+      "id": 8,
+      "image_path": "test_images/office_desk.jpg",
+      "expected_description": "A modern office desk with laptop and notebook"
+    },
+    {
+      "id": 9,
+      "image_path": "test_images/garden_flowers.jpg",
+      "expected_description": "Colorful flowers blooming in a garden"
+    },
+    {
+      "id": 10,
+      "image_path": "test_images/cat_window.jpg",
+      "expected_description": "A cat sitting by a window looking outside"
+    }
+  ]
+}

@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Description Testing System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 5px;
+            height: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 5px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f8f9fa;
+        }
+
+        .upload-area.dragover {
+            background: #e9ecef;
+            border-color: #764ba2;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .test-cases-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .test-case-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-case-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .test-case-info {
+            flex: 1;
+        }
+
+        .test-case-info strong {
+            display: block;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .test-case-info p {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .test-case-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .test-case-actions button {
+            padding: 8px 15px;
+            font-size: 0.9em;
+        }
+
+        .results-container {
+            display: none;
+        }
+
+        .results-container.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card h3 {
+            font-size: 2.5em;
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card p {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .results-table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .status-pass {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-fail {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .config-info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .config-info strong {
+            color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🖼️ Image Description Testing System</h1>
+            <p>Automated testing for vision AI models with semantic comparison</p>
+        </div>
+
+        <div class="content">
+            <!-- Configuration Info -->
+            <div class="config-info" id="configInfo">
+                <strong>API Provider:</strong> <span id="apiProvider">Loading...</span> | 
+                <strong>Similarity Threshold:</strong> <span id="similarityThreshold">Loading...</span>
+            </div>
+
+            <!-- Add Test Case Section -->
+            <div class="section">
+                <h2 class="section-title">Add Test Case</h2>
+                
+                <div class="form-group">
+                    <label for="imageUpload">Image</label>
+                    <div class="upload-area" id="uploadArea" onclick="document.getElementById('imageUpload').click()">
+                        <p>📁 Click to upload or drag and drop</p>
+                        <p style="font-size: 0.9em; color: #666; margin-top: 10px;">PNG, JPG, GIF, WEBP (Max 16MB)</p>
+                    </div>
+                    <input type="file" id="imageUpload" accept="image/*">
+                </div>
+
+                <div class="form-group">
+                    <label for="expectedDescription">Expected Description</label>
+                    <textarea id="expectedDescription" placeholder="Enter the expected description of the image..."></textarea>
+                </div>
+
+                <button onclick="addTestCase()">➕ Add Test Case</button>
+            </div>
+
+            <!-- Test Cases List Section -->
+            <div class="section">
+                <h2 class="section-title">Test Cases (<span id="testCaseCount">0</span>)</h2>
+                
+                <div class="action-buttons" style="margin-bottom: 20px;">
+                    <button class="btn-secondary" onclick="runAllTests()" id="runTestsBtn">
+                        ▶️ Run All Tests
+                    </button>
+                    <button class="btn-danger" onclick="clearAllTestCases()">
+                        🗑️ Clear All
+                    </button>
+                </div>
+
+                <div id="testCasesList" class="test-cases-list">
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                        </svg>
+                        <p>No test cases yet. Add your first test case above!</p>
+                    </div>
+                </div>
+
+                <div class="loading" id="loadingIndicator">
+                    <div class="spinner"></div>
+                    <p>Running tests... This may take a moment.</p>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="section results-container" id="resultsSection">
+                <h2 class="section-title">Test Results</h2>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 id="totalTests">0</h3>
+                        <p>Total Tests</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="passedTests" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">0</h3>
+                        <p>Passed</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="failedTests" style="background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">0</h3>
+                        <p>Failed</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="successRate">0%</h3>
+                        <p>Success Rate</p>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="resultsChart"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="similarityChart"></canvas>
+                </div>
+
+                <div class="results-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Test ID</th>
+                                <th>Status</th>
+                                <th>Similarity</th>
+                                <th>Expected</th>
+                                <th>Actual</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let testCases = [];
+        let currentResults = null;
+        let resultsChart = null;
+        let similarityChart = null;
+
+        // Load configuration on page load
+        async function loadConfig() {
+            try {
+                const response = await fetch('/api/config');
+                const config = await response.json();
+                document.getElementById('apiProvider').textContent = config.api_provider.toUpperCase();
+                document.getElementById('similarityThreshold').textContent = config.similarity_threshold;
+            } catch (error) {
+                console.error('Error loading config:', error);
+            }
+        }
+
+        // Load test cases on page load
+        async function loadTestCases() {
+            try {
+                const response = await fetch('/api/test-cases');
+                const data = await response.json();
+                testCases = data.test_cases;
+                updateTestCasesList();
+            } catch (error) {
+                console.error('Error loading test cases:', error);
+            }
+        }
+
+        // Handle drag and drop
+        const uploadArea = document.getElementById('uploadArea');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                document.getElementById('imageUpload').files = e.dataTransfer.files;
+            }
+        });
+
+        // Add test case
+        async function addTestCase() {
+            const fileInput = document.getElementById('imageUpload');
+            const description = document.getElementById('expectedDescription').value;
+
+            if (!fileInput.files[0]) {
+                alert('Please select an image');
+                return;
+            }
+
+            if (!description) {
+                alert('Please enter an expected description');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+            formData.append('description', description);
+
+            try {
+                const response = await fetch('/api/test-cases', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    fileInput.value = '';
+                    document.getElementById('expectedDescription').value = '';
+                    await loadTestCases();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + error.error);
+                }
+            } catch (error) {
+                alert('Error adding test case: ' + error.message);
+            }
+        }
+
+        // Update test cases list
+        function updateTestCasesList() {
+            const list = document.getElementById('testCasesList');
+            document.getElementById('testCaseCount').textContent = testCases.length;
+
+            if (testCases.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                        </svg>
+                        <p>No test cases yet. Add your first test case above!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = testCases.map(tc => `
+                <div class="test-case-item">
+                    <img src="/uploads/${tc.image_path}" alt="Test ${tc.id}">
+                    <div class="test-case-info">
+                        <strong>Test Case #${tc.id}</strong>
+                        <p>${tc.expected_description}</p>
+                    </div>
+                    <div class="test-case-actions">
+                        <button class="btn-danger" onclick="deleteTestCase(${tc.id})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Delete test case
+        async function deleteTestCase(id) {
+            if (!confirm('Are you sure you want to delete this test case?')) return;
+
+            try {
+                const response = await fetch(`/api/test-cases/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    await loadTestCases();
+                }
+            } catch (error) {
+                alert('Error deleting test case: ' + error.message);
+            }
+        }
+
+        // Clear all test cases
+        async function clearAllTestCases() {
+            if (!confirm('Are you sure you want to clear all test cases?')) return;
+
+            try {
+                const response = await fetch('/api/test-cases/clear', {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    await loadTestCases();
+                    document.getElementById('resultsSection').classList.remove('active');
+                }
+            } catch (error) {
+                alert('Error clearing test cases: ' + error.message);
+            }
+        }
+
+        // Run all tests
+        async function runAllTests() {
+            if (testCases.length === 0) {
+                alert('Please add test cases first');
+                return;
+            }
+
+            document.getElementById('loadingIndicator').classList.add('active');
+            document.getElementById('runTestsBtn').disabled = true;
+
+            try {
+                const response = await fetch('/api/run-tests', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    currentResults = await response.json();
+                    displayResults(currentResults);
+                } else {
+                    const error = await response.json();
+                    alert('Error running tests: ' + error.error);
+                }
+            } catch (error) {
+                alert('Error running tests: ' + error.message);
+            } finally {
+                document.getElementById('loadingIndicator').classList.remove('active');
+                document.getElementById('runTestsBtn').disabled = false;
+            }
+        }
+
+        // Display results
+        function displayResults(results) {
+            document.getElementById('resultsSection').classList.add('active');
+
+            // Update stats
+            document.getElementById('totalTests').textContent = results.total_tests;
+            document.getElementById('passedTests').textContent = results.passed;
+            document.getElementById('failedTests').textContent = results.failed;
+            document.getElementById('successRate').textContent = results.success_rate.toFixed(1) + '%';
+
+            // Update pie chart
+            updatePieChart(results);
+
+            // Update similarity chart
+            updateSimilarityChart(results);
+
+            // Update table
+            updateResultsTable(results);
+
+            // Scroll to results
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Update pie chart
+        function updatePieChart(results) {
+            const ctx = document.getElementById('resultsChart').getContext('2d');
+
+            if (resultsChart) {
+                resultsChart.destroy();
+            }
+
+            resultsChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Passed', 'Failed'],
+                    datasets: [{
+                        data: [results.passed, results.failed],
+                        backgroundColor: [
+                            'rgba(56, 239, 125, 0.8)',
+                            'rgba(235, 51, 73, 0.8)'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Test Results Overview',
+                            font: {
+                                size: 16
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update similarity chart
+        function updateSimilarityChart(results) {
+            const ctx = document.getElementById('similarityChart').getContext('2d');
+
+            if (similarityChart) {
+                similarityChart.destroy();
+            }
+
+            const testCases = results.test_cases;
+            const labels = testCases.map(tc => `Test ${tc.id}`);
+            const scores = testCases.map(tc => (tc.similarity_score * 100).toFixed(1));
+            const colors = testCases.map(tc => tc.passed ? 
+                'rgba(56, 239, 125, 0.8)' : 'rgba(235, 51, 73, 0.8)');
+
+            similarityChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Similarity Score (%)',
+                        data: scores,
+                        backgroundColor: colors,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Similarity Scores by Test Case',
+                            font: {
+                                size: 16
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update results table
+        function updateResultsTable(results) {
+            const tbody = document.getElementById('resultsTableBody');
+            
+            tbody.innerHTML = results.test_cases.map(tc => `
+                <tr>
+                    <td><strong>#${tc.id}</strong></td>
+                    <td>
+                        <span class="status-badge ${tc.passed ? 'status-pass' : 'status-fail'}">
+                            ${tc.passed ? '✓ PASS' : '✗ FAIL'}
+                        </span>
+                    </td>
+                    <td><strong>${(tc.similarity_score * 100).toFixed(1)}%</strong></td>
+                    <td style="max-width: 300px;">${tc.expected_description}</td>
+                    <td style="max-width: 300px;">${tc.actual_description}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadConfig();
+            loadTestCases();
+        });
+    </script>
+</body>
+</html>
